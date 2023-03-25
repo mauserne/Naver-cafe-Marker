@@ -74,28 +74,42 @@ function highlight_reply(thumbs) {
   });
 }
 
+let recent_updated = new Set(); //하트가 안달린 글을 새로고침 전까지 다시 탐색하지 않음(최적화)
+
+function difference_Set(a, b) {
+  return new Set([...a].filter((x) => !b.has(x)));
+}
+
+function union_Set(a, b) {
+  return new Set([...a, ...b]);
+}
+
 function heart_marker(i_article, current_display_articles) {
   console.log(cooldown);
   getVisited()
     .then((visited) => {
       console.log(visited);
-      let willupdate = current_display_articles.filter(function (value) {
-        return !visited.includes(value);
-      });
-      console.log(willupdate, current_display_articles);
-      callAPIAsync(willupdate)
+      let willupdate = difference_Set(
+        new Set([...current_display_articles]),
+        new Set([...visited])
+      );
+      cooldown += [...willupdate].length;
+      console.log(recent_updated, willupdate, current_display_articles);
+
+      callAPIAsync([...difference_Set(willupdate, recent_updated)])
         .then((replied_list) => {
           i_article.forEach((article) => {
             var articleId = article.href.match(/articleid=(\d+)/)[1];
             if (replied_list.concat(visited).includes(articleId)) {
-              cooldown++;
               if (window.getComputedStyle(article).display == "table-cell") {
-                article.parentNode.insertAdjacentHTML(
-                  "beforeend",
-                  "<span style='display: table-cell'>💗</span>"
-                );
+                if (article.parentNode.lastElementChild.innerText != "💛") {
+                  article.parentNode.insertAdjacentHTML(
+                    "beforeend",
+                    "<span style='display: table-cell'>💛</span>"
+                  );
+                }
               } else {
-                article.parentNode.insertAdjacentHTML("beforeend", "<span>💗</span>");
+                article.parentNode.insertAdjacentHTML("beforeend", "<span>💛</span>");
               }
             }
           });
@@ -103,6 +117,7 @@ function heart_marker(i_article, current_display_articles) {
         .catch((error) => {
           console.error(error);
         });
+      recent_updated = union_Set(recent_updated, willupdate);
     })
     .catch((error) => {
       console.error(error);
@@ -132,21 +147,31 @@ function iframe_manipulate() {
     });
   };
 
-  waitForThumbs()
-    .then((thumbs) => {
-      highlight_reply(thumbs);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
   i_article.forEach((article) => {
     var articleId = article.href.match(/articleid=(\d+)/)[1];
 
     current_display_articles.push(articleId);
   });
 
-  heart_marker(i_article, current_display_articles);
+  chrome.storage.local.get(["highlight_switch"], function (result) {
+    //댓글 하이라이트 toggle
+    if (result.highlight_switch) {
+      waitForThumbs()
+        .then((thumbs) => {
+          highlight_reply(thumbs);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  });
+
+  chrome.storage.local.get(["heart_switch"], function (result) {
+    //하트마커 toggle
+    if (result.heart_switch) {
+      heart_marker(i_article, current_display_articles);
+    }
+  });
 }
 
 //카페 페이지 first Enter 에 iframe을 load 하지 못할 때
@@ -158,14 +183,14 @@ let cooldown = 0;
 
 setInterval(() => {
   cooldown = 0;
-}, 1000 * 60 * 5);
+}, 1000 * 60 * 2);
 
 iframe.onload = function () {
   iframe_manipulate();
-  if (cooldown > 10) {
+  if (cooldown > 150) {
     cooldown = 0;
     alert(
-      '"💗하트 마커" 활성화 상태에서 단시간에 대량의 글을 탐색하면, 일시적으로 카페 이용에 쿨타임이 발생할 수 있습니다.'
+      '"💛하트 마커" 활성화 상태에서 단시간에 대량의 글을 탐색하면, 일시적으로 카페 이용이 거부될 수 있습니다.'
     );
   }
 };

@@ -1,11 +1,13 @@
 chrome.runtime.onInstalled.addListener(function (details) {
   if (details.reason == "install") {
     console.log("Thank you for download Naver cafe Marker!");
-    chrome.storage.local.set({ visited: [] });
+    chrome.storage.local.set({ highlight_switch: true });
+    chrome.storage.local.set({ heart_switch: true });
   }
   if (details.reason == "update") {
     console.log("확장프로그램이 업데이트 되었습니다.");
-    chrome.storage.local.set({ visited: [1, 2] });
+    chrome.storage.local.set({ highlight_switch: true });
+    chrome.storage.local.set({ heart_switch: true });
   }
 });
 
