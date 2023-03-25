@@ -1,0 +1,113 @@
+html {
+  font-size: 60%;
+  width: 30rem;
+  height: 12rem;
+}
+
+h1 {
+  margin-left: 1rem;
+  font-size: large;
+}
+
+.modal {
+  text-align: center;
+}
+.modal.show {
+  font-weight: bold;
+  color: red;
+}
+
+.contact {
+  margin-top: 2rem;
+  padding-bottom: 1rem;
+  color: darkgray;
+  display: flex;
+  justify-content: center;
+}
+
+.switchContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heartSwitch,
+.highlightSwitch {
+  right: 1rem;
+  width: 6rem;
+  height: 3rem;
+  display: block;
+  position: relative;
+  border-radius: 2rem;
+  background-color: #f03d3d;
+  box-shadow: inset 0 0 1.5rem 1px rgba(0 0 0 / 15%);
+  cursor: pointer;
+}
+
+.heartSwitch .toggleButton,
+.highlightSwitch .toggleButton {
+  width: 2.6rem;
+  height: 2.6rem;
+  position: absolute;
+  top: 50%;
+  left: 0.2rem;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  box-shadow: 0 0 0.25rem 1px rgba(0 0 0 / 15%);
+  background: #fff;
+}
+
+/* 체크박스가 체크되면 변경 이벤트 */
+.heartSwitch.active,
+.highlightSwitch.active {
+  background: #78d9ff;
+}
+
+.heartSwitch.actived-already,
+.highlightSwitch.actived-already {
+  transition: none;
+  background: #78d9ff;
+}
+
+.heartSwitch.active .toggleButton,
+.heartSwitch.actived-already .toggleButton,
+.highlightSwitch.active .toggleButton,
+.highlightSwitch.actived-already .toggleButton {
+  left: calc(100% - 2.8rem);
+}
+
+.heartSwitch,
+.highlightSwitch,
+.toggleButton {
+  transition: all 0.2s ease-in;
+}
+
+.heartSwitch.actived-already .toggleButton,
+.highlightSwitch.actived-already .toggleButton {
+  transition: none;
+}
+
+.ad {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  margin-top: 2rem;
+  max-width: 100%;
+  height: 9rem;
+  border-radius: 20px;
+  background: linear-gradient(90deg, rgb(183, 34, 202) 0%, rgb(255, 170, 42) 92%);
+}
+
+.adTitle {
+  color: white;
+  font-weight: 600;
+  font-size: large;
+}
+.adContent {
+  color: white;
+  font-weight: 500;
+  font-size: small;
+}
