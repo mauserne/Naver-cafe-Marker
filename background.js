@@ -10,17 +10,13 @@ chrome.runtime.onInstalled.addListener(function (details) {
 });
 // 캐쉬 초기화 함수 구현?
 
-/* chrome.storage.local.getBytesInUse(null, function (bytes) {
+chrome.storage.local.getBytesInUse(null, function (bytes) {
   let kb = bytes / 1024;
   let mb = kb / 1024;
   console.log(
     "Local storage used by extension: " + kb.toFixed(2) + " kB, " + mb.toFixed(2) + " MB"
   );
 });
-
-chrome.storage.local.get((result) => {
-  console.log("Local storage > ", result);
-}); */
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   console.log(

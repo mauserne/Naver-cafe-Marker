@@ -22,11 +22,6 @@ function extract_info() {
 }
 
 const [ownerName, ownerKey, cafeId] = extract_info();
-chrome.storage.local.get([cafeId], (result) => {
-  if (!result[cafeId]) {
-    chrome.storage.local.set({ [cafeId]: [] });
-  }
-});
 
 let iframe;
 
@@ -115,6 +110,23 @@ function heart_marker(i_article, current_display_articles) {
 }
 
 function iframe_manipulate() {
+  let cafe_category = document.body.querySelector(".area_info_content").innerText;
+
+  if (!cafe_category.includes("팬카페") && !cafe_category.includes("인터넷방송")) {
+    // 카테고리 불일치시 확장프로그램 비활성
+    console.log(
+      "Naver cafe Marker는 '팬카페' 또는 '인터넷방송' 카테고리의 카페에서 활성화됩니다.\n 현재 카테고리 : ",
+      cafe_category
+    );
+    return false;
+  }
+
+  chrome.storage.local.get([cafeId], (result) => {
+    if (!result[cafeId]) {
+      chrome.storage.local.set({ [cafeId]: [] });
+    }
+  });
+
   console.log("iframe 로드 완료!1 - Naver cafe marker");
   let current_display_articles = [];
   let iframeDoc = iframe.contentWindow.document;
@@ -157,7 +169,7 @@ function iframe_manipulate() {
   });
 
   chrome.storage.local.get(["heart_switch"], function (result) {
-    //하트마커 toggle
+    //하트마커 toggle 체크
     if (result.heart_switch) {
       heart_marker(i_article, current_display_articles);
     }
