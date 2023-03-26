@@ -9,7 +9,15 @@ h1 {
   font-size: large;
 }
 
+hr {
+  margin-left: 10px;
+  margin-right: 10px;
+  border: 0;
+  border-top: 1px solid #ccc;
+}
+
 .modal {
+  padding-top: 1rem;
   text-align: center;
 }
 .modal.show {
