@@ -6,10 +6,21 @@ chrome.runtime.onInstalled.addListener(function (details) {
   }
   if (details.reason == "update") {
     console.log("확장프로그램이 업데이트 되었습니다.");
-    chrome.storage.local.set({ highlight_switch: true });
-    chrome.storage.local.set({ heart_switch: true });
   }
 });
+// 캐쉬 초기화 함수 구현?
+
+/* chrome.storage.local.getBytesInUse(null, function (bytes) {
+  let kb = bytes / 1024;
+  let mb = kb / 1024;
+  console.log(
+    "Local storage used by extension: " + kb.toFixed(2) + " kB, " + mb.toFixed(2) + " MB"
+  );
+});
+
+chrome.storage.local.get((result) => {
+  console.log("Local storage > ", result);
+}); */
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   console.log(
@@ -34,31 +45,31 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             reject(error);
           });
       });
-
       Promise.all(fetchList)
         .then((results) => {
           // 모든 API 요청이 완료되었을 때 실행되는 코드
-          resolve(results); // 각 API 요청의 처리 결과가 담긴 배열
+          const filteredArr = results.filter((item) => {
+            return item !== undefined;
+          });
+          resolve(filteredArr); // 각 API 요청의 처리 결과가 담긴 배열
           // 결과 처리 코드 작성
         })
         .catch((error) => {
           sendResponse({ error: error.message });
         });
     });
+
     fetchPromise.then((responseData) => {
       sendResponse({ data: responseData });
 
-      let tmp = [];
-      responseData.forEach((ele) => {
-        if (ele) {
-          tmp.push(ele);
-        }
-      });
       chrome.storage.local.get([cafeId], (result) => {
-        chrome.storage.local.set({ [cafeId]: result[cafeId].concat(tmp) });
+        chrome.storage.local.set({
+          [cafeId]: result[cafeId].concat(responseData),
+        });
       });
-      console.log(responseData, tmp);
+      console.log("sending to content-script", responseData);
     });
+
     return true;
   }
 });

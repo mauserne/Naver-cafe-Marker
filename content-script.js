@@ -1,3 +1,11 @@
+function difference_Set(a, b) {
+  return new Set([...a].filter((x) => !b.has(x)));
+}
+
+function union_Set(a, b) {
+  return new Set([...a, ...b]);
+}
+
 function extract_info() {
   var o_page = document.body.querySelector(".id.mlink.gm-tcol-c");
   var tmp = o_page.href.lastIndexOf("/");
@@ -15,12 +23,8 @@ function extract_info() {
 
 const [ownerName, ownerKey, cafeId] = extract_info();
 chrome.storage.local.get([cafeId], (result) => {
-  console.log(result);
   if (!result[cafeId]) {
-    chrome.storage.local.set({ [cafeId]: [1] });
-    chrome.storage.local.get([cafeId], (result) => {
-      console.log(result);
-    });
+    chrome.storage.local.set({ [cafeId]: [] });
   }
 });
 
@@ -40,16 +44,13 @@ function wait_iframeCreated() {
   });
 }
 
-let replied_list = [];
-
 const getVisited = () => {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get([cafeId], (result) => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
       } else {
-        console.log(result[cafeId]);
-        resolve(result[cafeId]);
+        resolve(new Set(result[cafeId]));
       }
     });
   });
@@ -74,33 +75,22 @@ function highlight_reply(thumbs) {
   });
 }
 
-let recent_updated = new Set(); //하트가 안달린 글을 새로고침 전까지 다시 탐색하지 않음(최적화)
-
-function difference_Set(a, b) {
-  return new Set([...a].filter((x) => !b.has(x)));
-}
-
-function union_Set(a, b) {
-  return new Set([...a, ...b]);
-}
+let dont_update = new Set(); //하트가 안달린 글을 새로고침 전까지 다시 탐색하지 않음(최적화)
 
 function heart_marker(i_article, current_display_articles) {
-  console.log(cooldown);
   getVisited()
-    .then((visited) => {
-      console.log(visited);
+    .then((visited_sets) => {
       let willupdate = difference_Set(
         new Set([...current_display_articles]),
-        new Set([...visited])
+        visited_sets
       );
       cooldown += [...willupdate].length;
-      console.log(recent_updated, willupdate, current_display_articles);
 
-      callAPIAsync([...difference_Set(willupdate, recent_updated)])
-        .then((replied_list) => {
+      callAPIAsync([...difference_Set(willupdate, dont_update)])
+        .then((replied_sets) => {
           i_article.forEach((article) => {
             var articleId = article.href.match(/articleid=(\d+)/)[1];
-            if (replied_list.concat(visited).includes(articleId)) {
+            if (union_Set(replied_sets, visited_sets).has(articleId)) {
               if (window.getComputedStyle(article).display == "table-cell") {
                 if (article.parentNode.lastElementChild.innerText != "💛") {
                   article.parentNode.insertAdjacentHTML(
@@ -117,7 +107,7 @@ function heart_marker(i_article, current_display_articles) {
         .catch((error) => {
           console.error(error);
         });
-      recent_updated = union_Set(recent_updated, willupdate);
+      dont_update = union_Set(dont_update, willupdate);
     })
     .catch((error) => {
       console.error(error);

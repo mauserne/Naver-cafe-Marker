@@ -49,7 +49,7 @@ $heart.onclick = () => {
 
 ad.onclick = () => {
   chrome.tabs.create({
-    //패치노트 url
+    //Twitch Magic Chat 크롬 웹스토어 페이지 url
     url: "https://chrome.google.com/webstore/detail/mgdehebdbghhagjeicebdhkdbkemaefm?authuser=0&hl=ko",
     selected: true,
     active: true,
