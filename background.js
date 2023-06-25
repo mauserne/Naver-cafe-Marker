@@ -6,9 +6,20 @@ chrome.runtime.onInstalled.addListener(function (details) {
   }
   if (details.reason == "update") {
     console.log("확장프로그램이 업데이트 되었습니다.");
+
+    // 캐쉬 초기화
+    chrome.storage.local.get(null, function (data) {
+      var keys = Object.keys(data);
+      chrome.storage.local.remove(keys, function () {
+        console.log("Local storage cleaned!");
+        setTimeout(() => {
+          chrome.storage.local.set({ highlight_switch: true });
+          chrome.storage.local.set({ heart_switch: true });
+        }, 500);
+      });
+    });
   }
 });
-// 캐쉬 초기화 함수 구현?
 
 chrome.storage.local.getBytesInUse(null, function (bytes) {
   let kb = bytes / 1024;
@@ -32,7 +43,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         )
           .then((response) => response.json())
           .then((data) => {
-            if (JSON.stringify(data).includes(request.ownerKey)) {
+            if (
+              JSON.stringify(data.result.comments.items).includes(request.ownerKey) ||
+              JSON.stringify(data.result.likeItUsers).includes(request.ownerKey)
+            ) {
               console.log(el, "게시물에 주인확인");
               return el;
             }
