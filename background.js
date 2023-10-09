@@ -8,18 +8,22 @@ chrome.runtime.onInstalled.addListener(function (details) {
     console.log("확장프로그램이 업데이트 되었습니다.");
 
     // 캐쉬 초기화
-    chrome.storage.local.get(null, function (data) {
-      var keys = Object.keys(data);
-      chrome.storage.local.remove(keys, function () {
-        console.log("Local storage cleaned!");
-        setTimeout(() => {
-          chrome.storage.local.set({ highlight_switch: true });
-          chrome.storage.local.set({ heart_switch: true });
-        }, 500);
-      });
-    });
+    // dumpData()
   }
 });
+
+function dumpData() {
+  chrome.storage.local.get(null, function (data) {
+    var keys = Object.keys(data);
+    chrome.storage.local.remove(keys, function () {
+      console.log("Local storage cleaned!");
+      setTimeout(() => {
+        chrome.storage.local.set({ highlight_switch: true });
+        chrome.storage.local.set({ heart_switch: true });
+      }, 500);
+    });
+  });
+}
 
 chrome.storage.local.getBytesInUse(null, function (bytes) {
   let kb = bytes / 1024;
