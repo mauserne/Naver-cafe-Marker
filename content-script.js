@@ -109,23 +109,37 @@ function heart_marker(i_article, current_display_articles) {
     });
 }
 
-function iframe_manipulate() {
-  let cafe_category = document.body.querySelector(".area_info_content").innerText;
+let category_valid = true;
 
-  if (!cafe_category.includes("팬카페") && !cafe_category.includes("인터넷방송")) {
-    // 카테고리 불일치시 확장프로그램 비활성
+function category_check() {
+  fetch(`https://cafe.naver.com/CafeProfileView.nhn?clubid=${cafeId}`)
+    .then((response) => response.arrayBuffer())
+    .then((buffer) => {
+      // ArrayBuffer를 EUC-KR 문자열로 디코딩합니다.
+      let decoder = new TextDecoder("euc-kr");
+      let decodedData = decoder.decode(buffer);
+
+      if (decodedData.includes("팬카페") || decodedData.includes("인터넷방송")) {
+        category_valid = true;
+      } else {
+        // 카테고리 불일치시 확장프로그램 비활성
+        category_valid = false;
+      }
+    })
+    .catch((error) => {
+      console.error("데이터 가져오기 및 디코딩 실패:", error);
+    });
+}
+category_check();
+
+function iframe_manipulate() {
+  if (!category_valid) {
     console.log(
-      "Naver cafe Marker는 '팬카페' 또는 '인터넷방송' 카테고리의 카페에서 활성화됩니다.\n 현재 카테고리 : ",
-      cafe_category
+      category_valid,
+      "Naver cafe Marker는 '팬카페' 또는 '인터넷방송' 카테고리의 카페에서 활성화됩니다."
     );
     return false;
   }
-
-  chrome.storage.local.get([cafeId], (result) => {
-    if (!result[cafeId]) {
-      chrome.storage.local.set({ [cafeId]: [] });
-    }
-  });
 
   console.log("iframe 로드 완료!1 - Naver cafe marker");
   let current_display_articles = [];
