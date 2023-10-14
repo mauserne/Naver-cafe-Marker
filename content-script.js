@@ -66,6 +66,8 @@ function highlight_reply(thumbs) {
   thumbs.forEach((el) => {
     if (el.href.includes(ownerKey)) {
       el.parentNode.parentNode.style.backgroundColor = "cornsilk";
+      el.parentNode.parentNode.className =
+        el.parentNode.parentNode.className + " CafeOwner";
     }
   });
 }
@@ -145,6 +147,27 @@ function iframe_manipulate() {
   let current_display_articles = [];
   let iframeDoc = iframe.contentWindow.document;
   let i_article = iframeDoc.querySelectorAll(".article");
+
+  let st = document.createElement("style");
+  st.innerText = `
+    .CommentItem.CafeOwner::before {
+      width: 858px;
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -29px;
+      border-radius: 25px;
+      right: -29px;
+      background-color: cornsilk;
+    }
+    
+    .CommentItem.CommentItem--reply.CafeOwner  {
+      padding-left: 0 !important;
+      margin-left: 46px;
+    }
+    `;
+  iframeDoc.head.appendChild(st);
 
   const waitForThumbs = () => {
     return new Promise((resolve, reject) => {
