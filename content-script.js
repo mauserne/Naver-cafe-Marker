@@ -74,14 +74,13 @@ function highlight_reply(thumbs) {
 
 let dont_update = new Set(); //하트가 안달린 글을 새로고침 전까지 다시 탐색하지 않음(최적화)
 
-function heart_marker(i_article, current_display_articles) {
+function heart_marker(i_article, i_albumimg, current_display_articles) {
   getVisited()
     .then((visited_sets) => {
       let willupdate = difference_Set(
         new Set([...current_display_articles]),
         visited_sets
       );
-      cooldown += [...willupdate].length;
 
       callAPIAsync([...difference_Set(willupdate, dont_update)])
         .then((replied_sets) => {
@@ -100,15 +99,36 @@ function heart_marker(i_article, current_display_articles) {
               }
             }
           });
+
+          i_albumimg.forEach((img) => {
+            var imgId = img.href.match(/articleid=(\d+)/)[1];
+            if (union_Set(replied_sets, visited_sets).has(imgId)) {
+              img.insertAdjacentHTML(
+                "beforeend",
+                "<span style='position: absolute; font-size: 25px; text-shadow: 0px 0px 3px rgba(95, 95, 95, 0.5); left: 1%;'>💛</span>"
+              );
+            }
+          });
         })
         .catch((error) => {
           console.error(error);
         });
+
+      past_tmp = [...dont_update].length;
       dont_update = union_Set(dont_update, willupdate);
+      cooldown += cooldown_Counter(past_tmp, [...dont_update].length);
     })
     .catch((error) => {
       console.error(error);
     });
+}
+
+function cooldown_Counter(past, now) {
+  if (past >= now) {
+    return 0;
+  } else {
+    return now - past;
+  }
 }
 
 let category_valid = true;
@@ -147,6 +167,7 @@ function iframe_manipulate() {
   let current_display_articles = [];
   let iframeDoc = iframe.contentWindow.document;
   let i_article = iframeDoc.querySelectorAll(".article");
+  let i_albumimg = iframeDoc.querySelectorAll(".album-img");
 
   let st = document.createElement("style");
   st.innerText = `
@@ -192,6 +213,12 @@ function iframe_manipulate() {
     current_display_articles.push(articleId);
   });
 
+  i_albumimg.forEach((albumimg) => {
+    var imgId = albumimg.href.match(/articleid=(\d+)/)[1];
+
+    current_display_articles.push(imgId);
+  });
+
   chrome.storage.local.get(["highlight_switch"], function (result) {
     //댓글 하이라이트 toggle
     if (result.highlight_switch) {
@@ -208,7 +235,7 @@ function iframe_manipulate() {
   chrome.storage.local.get(["heart_switch"], function (result) {
     //하트마커 toggle 체크
     if (result.heart_switch) {
-      heart_marker(i_article, current_display_articles);
+      heart_marker(i_article, i_albumimg, current_display_articles);
     }
   });
 }

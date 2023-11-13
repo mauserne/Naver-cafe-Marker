@@ -1,7 +1,7 @@
 {
   "name": "Naver cafe Marker - 팬카페를 위한 플러그인",
   "description": "네이버 카페 주인이 댓글 또는 좋아요를 남긴 글을 표시합니다.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "manifest_version": 3,
   "host_permissions": ["https://cafe.naver.com/*", "https://apis.naver.com/*"],
   "background": {
