@@ -7,7 +7,14 @@ chrome.runtime.onInstalled.addListener(function (details) {
   if (details.reason == "update") {
     console.log("확장프로그램이 업데이트 되었습니다.");
 
-    // 캐쉬 초기화
+    chrome.tabs.create({
+      //패치노트 url
+      url: "https://github.com/mauserne/Naver-cafe-Marker/releases",
+      selected: true,
+      active: true,
+    });
+
+    // 캐쉬 초기화!!!!
     // dumpData()
   }
 });
