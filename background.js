@@ -15,9 +15,10 @@ chrome.runtime.onInstalled.addListener(function (details) {
     });
 
     // 캐쉬 초기화!!!!
-    // dumpData()
+    dumpData()
   }
 });
+
 
 function dumpData() {
   chrome.storage.local.get(null, function (data) {
@@ -68,6 +69,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       });
       Promise.all(fetchList)
         .then((results) => {
+          console.log(results);
           // 모든 API 요청이 완료되었을 때 실행되는 코드
           const filteredArr = results.filter((item) => {
             return item !== undefined;
@@ -81,12 +83,20 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     });
 
     fetchPromise.then((responseData) => {
+      chrome.storage.local.get(null, function (data) {
+        console.log('All Data', data);
+      })
       sendResponse({ data: responseData });
-
       chrome.storage.local.get([cafeId], (result) => {
-        chrome.storage.local.set({
-          [cafeId]: result[cafeId].concat(responseData),
-        });
+        if (!result[cafeId]) {
+          chrome.storage.local.set({
+            [cafeId]: responseData
+          });
+        } else {
+          chrome.storage.local.set({
+            [cafeId]: result[cafeId].concat(responseData)
+          });
+        }
       });
       console.log("sending to content-script", responseData);
     });
